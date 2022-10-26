@@ -1,13 +1,6 @@
 library(tidyverse)
-library(dplyr)
-library(forcats)
-library(patchwork)
 
 f <- readRDS("01_data_pro_test.RDS")
-
-f %>%
-count(kraj)
-
 
 
 f <- f %>%
@@ -65,11 +58,8 @@ f <- f %>%
   unite("NUTS_2", a.x:a.y:a.x.x:a.y.y:a.x.x.x:a.y.y.y:a.x.x.x.x:a.y.y.y.y, na.rm = TRUE, remove = FALSE) %>%
   select(-a.x, -a.y, -a.x.x, -a.y.y, -a.x.x.x, -a.y.y.y, -a.x.x.x.x, -a.y.y.y.y)
   
-  
 
 
-
- f
 
 NUTS_3 <- 
   f %>%
@@ -79,19 +69,25 @@ NUTS_3 <-
   inner_join(
     f %>% 
       count(kraj, wt = pocet_asistentu) %>% 
-      rename("pocet_asistentu" = "n"), 
+      rename("pocet_skol" = "n"), 
     by = c("kraj" = "kraj")) %>%
-  
-  mutate( zaci_na_asistenta = pocet_zaku/ pocet_asistentu) %>%
   
   inner_join(
     f %>%
       group_by(kraj) %>%
       count(psycholog) %>%
       filter(psycholog == "ano") %>% 
-      rename("pocet_psychologu" = "n") %>%
+      rename("pocet_psych" = "n") %>%
       select(-psycholog), 
     by = c("kraj" = "kraj")) %>%
+  
+  inner_join(
+    f %>% 
+      count(kraj, wt = pocet_asistentu) %>% 
+      rename("pocet_asistentu" = "n"), 
+    by = c("kraj" = "kraj")) %>%
+  
+  mutate( zaci_na_asistenta = pocet_zaku/ pocet_asistentu)  %>%
   
   inner_join(
     f %>% 
@@ -102,8 +98,8 @@ NUTS_3 <-
                filter(!is.na(kraj)) %>%
                select(n)) %>%
       mutate(n = a$n) %>%
-      rename(spy_spec = n) %>%
-      select(kraj, spy_spec), 
+      rename(psycholog_ci_specialni_pedagog = n) %>%
+      select(kraj, psycholog_ci_specialni_pedagog), 
     by = c("kraj" = "kraj")) %>%
   
   inner_join(
@@ -114,43 +110,69 @@ NUTS_3 <-
     by = c("kraj" = "kraj"))  %>%
   filter(!is.na(kraj))
 
-NUTS_3
 
 
-NUTS_2 <- 
-  f %>%
+
+NUTS_2 <- NUTS_3 %>%
   count(NUTS_2, wt = pocet_zaku) %>%
-  rename("pocet_zaku" = "n") %>%
+  rename(pocet_zaku = n) %>%
   
-  inner_join(
-    f %>% 
-      count(NUTS_2, wt = pocet_asistentu) %>% 
-      rename("pocet_asistentu" = "n"), 
-    by = c("NUTS_2" = "NUTS_2")) %>%
+  inner_join(NUTS_3 %>%
+            count(NUTS_2, wt = pocet_asistentu) %>%
+              rename(pocet_asistentu = n),
+            by = c("NUTS_2" = "NUTS_2")
+  ) %>%
   
   mutate(zaci_na_asistenta = pocet_zaku/ pocet_asistentu) %>%
   
   mutate(NUTS_2 = factor(NUTS_2) %>% fct_relevel(c("Praha", "Střední Čechy", "Jihozápad",  "Severozápad", "Severovýchod", "Jihovýchod", "Střední Morava", "Moravskoslezsko"))) %>%
   arrange(NUTS_2) %>%
-  filter(!is.na(NUTS_2)) 
+  filter(pocet_zaku != 0) 
+
 
 
 
 six <- f %>%
   count(psycholog, wt = pocet_zaku) %>%
   rename("b" = "psycholog") %>%
-  rename("psycholog" = "n") %>%
-  mutate(psycholog, psycholog =  psycholog / nrow(f)) %>%
+  rename("psychologa" = "n") %>%
+  mutate(psychologa, psychologa =  psychologa / nrow(f)) %>%
 
   inner_join(
     f %>%
       count(spec_pedagog, wt = pocet_zaku) %>%
       rename("b" = "spec_pedagog") %>%
-      rename("spec_pedagog" = "n") %>%
-      mutate(spec_pedagog, spec_pedagog =  spec_pedagog / nrow(f)),
+      rename("Specálního_pedagoga" = "n") %>%
+      mutate(Specálního_pedagoga, Specálního_pedagoga =  Specálního_pedagoga / nrow(f)),
   by = c("b" = "b")) %>%
   filter(!is.na(b))
+six[1,1] = "Mají: "
+six[2,1] = "Nemají: "
 
+
+  print("Počet škol v krajích")
+  print(NUTS_3 %>% select(kraj, pocet_skol))
+
+  print("I.a Počet žáků za kraj: ")
+  print(NUTS_3 %>% select(kraj, pocet_zaku))
   
-
+  
+  print("I.b Počet žáků za NUTS2: ")
+  print(NUTS_2 %>% select(NUTS_2, pocet_zaku))
+  
+  
+  print("V. Počet žáků na assistenta/ku pedagoga/žky")
+  print("a. za kraj")
+  print(NUTS_3 %>% select(kraj, zaci_na_asistenta))
+  
+  print("b. za NUTS2")
+  print(NUTS_2 %>% select(NUTS_2, zaci_na_asistenta))
+  
+  
+  print("VI. Průměrný počet žáků ve školách, které (ne)mají: ")
+  print(six)
+  
+  
+  print("VII. Procento škol ve kraji, ve kterých je psycholog či speciální pedagog.")
+  print(NUTS_3 %>% select(kraj, psycholog_ci_specialni_pedagog))
   
