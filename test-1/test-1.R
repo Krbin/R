@@ -1,4 +1,5 @@
 library(tidyverse)
+library(xlsx)
 
 f <- readRDS("01_data_pro_test.RDS")
 
@@ -58,7 +59,7 @@ f <- f %>%
   unite("NUTS_2", a.x:a.y:a.x.x:a.y.y:a.x.x.x:a.y.y.y:a.x.x.x.x:a.y.y.y.y, na.rm = TRUE, remove = FALSE) %>%
   select(-a.x, -a.y, -a.x.x, -a.y.y, -a.x.x.x, -a.y.y.y, -a.x.x.x.x, -a.y.y.y.y)
   
-
+f
 
 
 NUTS_3 <- 
@@ -68,7 +69,7 @@ NUTS_3 <-
   
   inner_join(
     f %>% 
-      count(kraj, wt = pocet_asistentu) %>% 
+      count(kraj) %>% 
       rename("pocet_skol" = "n"), 
     by = c("kraj" = "kraj")) %>%
   
@@ -87,19 +88,19 @@ NUTS_3 <-
       rename("pocet_asistentu" = "n"), 
     by = c("kraj" = "kraj")) %>%
   
-  mutate( zaci_na_asistenta = pocet_zaku/ pocet_asistentu)  %>%
+  mutate( zna = pocet_zaku/ pocet_asistentu)  %>%
   
   inner_join(
     f %>% 
       filter(spec_pedagog == "ano" | psycholog == "ano") %>%
       count(kraj) %>%
-      mutate("a" = n / f %>%
+      mutate("a" = 100 * n / f %>%
                count(kraj) %>% 
                filter(!is.na(kraj)) %>%
                select(n)) %>%
       mutate(n = a$n) %>%
-      rename(psycholog_ci_specialni_pedagog = n) %>%
-      select(kraj, psycholog_ci_specialni_pedagog), 
+      rename(pcsp = n) %>%
+      select(kraj, pcsp), 
     by = c("kraj" = "kraj")) %>%
   
   inner_join(
@@ -123,7 +124,7 @@ NUTS_2 <- NUTS_3 %>%
             by = c("NUTS_2" = "NUTS_2")
   ) %>%
   
-  mutate(zaci_na_asistenta = pocet_zaku/ pocet_asistentu) %>%
+  mutate(zna = pocet_zaku/ pocet_asistentu) %>%
   
   mutate(NUTS_2 = factor(NUTS_2) %>% fct_relevel(c("Praha", "Střední Čechy", "Jihozápad",  "Severozápad", "Severovýchod", "Jihovýchod", "Střední Morava", "Moravskoslezsko"))) %>%
   arrange(NUTS_2) %>%
@@ -150,29 +151,37 @@ six[1,1] = "Mají: "
 six[2,1] = "Nemají: "
 
 
-  print("Počet škol v krajích")
-  print(NUTS_3 %>% select(kraj, pocet_skol))
 
-  print("I.a Počet žáků za kraj: ")
+write.xlsx(f, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/2.xlsx")
+
+  print("IV. Počet škol v krajích")
+  print(NUTS_3 %>% select(kraj, pocet_skol))
+  write.xlsx(NUTS_3 %>% select(kraj, pocet_skol), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_skol.xlsx")
+  
+  print("IV.a Počet žáků za kraj: ")
   print(NUTS_3 %>% select(kraj, pocet_zaku))
+  write.xlsx(NUTS_3 %>% select(kraj, pocet_zaku), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_zaku-3.xlsx")
   
-  
-  print("I.b Počet žáků za NUTS2: ")
+  print("IV.b Počet žáků za NUTS2: ")
   print(NUTS_2 %>% select(NUTS_2, pocet_zaku))
-  
+  write.xlsx(NUTS_2 %>% select(NUTS_2, pocet_zaku), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_zaku-2.xlsx")
   
   print("V. Počet žáků na assistenta/ku pedagoga/žky")
   print("a. za kraj")
-  print(NUTS_3 %>% select(kraj, zaci_na_asistenta))
+  print(NUTS_3 %>% select(kraj, zna))
+  write.xlsx(NUTS_3 %>% select(kraj, zna), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/zna-3.xlsx")
   
   print("b. za NUTS2")
-  print(NUTS_2 %>% select(NUTS_2, zaci_na_asistenta))
+  print(NUTS_2 %>% select(NUTS_2, zna))
+  write.xlsx(NUTS_2 %>% select(NUTS_2, zna), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/zna-2.xlsx")
   
   
   print("VI. Průměrný počet žáků ve školách, které (ne)mají: ")
   print(six)
+  write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/6.xlsx")
   
   
   print("VII. Procento škol ve kraji, ve kterých je psycholog či speciální pedagog.")
-  print(NUTS_3 %>% select(kraj, psycholog_ci_specialni_pedagog))
+  print(NUTS_3 %>% select(kraj, pcsp))
+  write.xlsx(NUTS_3 %>% select(kraj, pcsp), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/7.xlsx")
   
