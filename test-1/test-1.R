@@ -152,36 +152,39 @@ six[2,1] = "Nemají: "
 
 
 
-write.xlsx(f, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/2.xlsx")
+write.xlsx(f, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/data.xlsx")
+write.xlsx(NUTS_2, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/NUTS-2.xlsx")
+write.xlsx(NUTS_3, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/NUTS-3.xlsx")
+write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/six.xlsx")
 
   print("IV. Počet škol v krajích")
   print(NUTS_3 %>% select(kraj, pocet_skol))
-  write.xlsx(NUTS_3 %>% select(kraj, pocet_skol), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_skol.xlsx")
+  
   
   print("IV.a Počet žáků za kraj: ")
   print(NUTS_3 %>% select(kraj, pocet_zaku))
-  write.xlsx(NUTS_3 %>% select(kraj, pocet_zaku), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_zaku-3.xlsx")
+  
   
   print("IV.b Počet žáků za NUTS2: ")
   print(NUTS_2 %>% select(NUTS_2, pocet_zaku))
-  write.xlsx(NUTS_2 %>% select(NUTS_2, pocet_zaku), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/pocet_zaku-2.xlsx")
+  
   
   print("V. Počet žáků na assistenta/ku pedagoga/žky")
   print("a. za kraj")
   print(NUTS_3 %>% select(kraj, zna))
-  write.xlsx(NUTS_3 %>% select(kraj, zna), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/zna-3.xlsx")
+  
   
   print("b. za NUTS2")
   print(NUTS_2 %>% select(NUTS_2, zna))
-  write.xlsx(NUTS_2 %>% select(NUTS_2, zna), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/zna-2.xlsx")
+  
   
   
   print("VI. Průměrný počet žáků ve školách, které (ne)mají: ")
   print(six)
-  write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/6.xlsx")
+  
   
   
   print("VII. Procento škol ve kraji, ve kterých je psycholog či speciální pedagog.")
   print(NUTS_3 %>% select(kraj, pcsp))
-  write.xlsx(NUTS_3 %>% select(kraj, pcsp), "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/7.xlsx")
+  
   
