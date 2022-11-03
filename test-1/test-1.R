@@ -8,57 +8,14 @@ f <- f %>%
   mutate(kraj = factor(kraj) %>% fct_relevel(c("Praha", "Středočeský", "Jihočeský",  "Plzeňský", "Karlovarský", "Ústecký", "Liberecký", "Královéhradecký", "Pardubický", "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"))) %>%
   arrange(kraj) %>%
   
-  left_join(
-    f %>%
-      filter(kraj == "Praha") %>%
-      mutate(a = "Praha") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Středočeský") %>%
-      mutate(a = "Střední Čechy") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Jihočeský" | kraj == "Plzeňský") %>%
-      mutate(a = "Jihozápad") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Karlovarský" | kraj == "Ústecký") %>%
-      mutate(a = "Severozápad") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Liberecký" | kraj == "Královéhradecký" | kraj == "Pardubický") %>%
-      mutate(a = "Severovýchod") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Vysočina" | kraj == "Jihomoravský") %>%
-      mutate(a = "Jihovýchod") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Olomoucký" | kraj == "Zlínský") %>%
-      mutate(a = "Střední Morava") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  left_join(
-    f %>%
-      filter(kraj == "Moravskoslezský") %>%
-      mutate(a = "Moravskoslezsko") %>%
-      select(ID, a), by = c("ID" = "ID")) %>%
-  
-  unite("NUTS_2", a.x:a.y:a.x.x:a.y.y:a.x.x.x:a.y.y.y:a.x.x.x.x:a.y.y.y.y, na.rm = TRUE, remove = FALSE) %>%
-  select(-a.x, -a.y, -a.x.x, -a.y.y, -a.x.x.x, -a.y.y.y, -a.x.x.x.x, -a.y.y.y.y)
-  
+  left_join( tibble(NUTS3 = c("Praha", "Středočeský", "Jihočeský", "Plzeňský", 
+                              "Karlovarský","Ústecký", "Liberecký","Královéhradecký", "Pardubický", 
+                              "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"),
+                    NUTS2 = c("CZ01", "CZ02", "CZ03", "CZ03", 
+                              "CZ04", "CZ04", "CZ05", "CZ05", "CZ05",
+                              "CZ06", "CZ06", "CZ07", "CZ07", "CZ08"),
+                    by = "NUTS3")
+    ) 
 f
 
 
@@ -147,6 +104,7 @@ six <- f %>%
       mutate(Specálního_pedagoga, Specálního_pedagoga =  Specálního_pedagoga / nrow(f)),
   by = c("b" = "b")) %>%
   filter(!is.na(b))
+  
 six[1,1] = "Mají: "
 six[2,1] = "Nemají: "
 
