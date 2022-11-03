@@ -5,17 +5,17 @@ f <- readRDS("01_data_pro_test.RDS")
 
 
 f <- f %>%
-  mutate(kraj = factor(kraj) %>% fct_relevel(c("Praha", "Středočeský", "Jihočeský",  "Plzeňský", "Karlovarský", "Ústecký", "Liberecký", "Královéhradecký", "Pardubický", "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"))) %>%
+  mutate(kraj = kraj %>% fct_relevel(c("Praha", "Středočeský", "Jihočeský",  "Plzeňský", "Karlovarský", "Ústecký", "Liberecký", "Královéhradecký", "Pardubický", "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"))) %>%
   arrange(kraj) %>%
   
   left_join( tibble(NUTS3 = c("Praha", "Středočeský", "Jihočeský", "Plzeňský", 
                               "Karlovarský","Ústecký", "Liberecký","Královéhradecký", "Pardubický", 
                               "Vysočina", "Jihomoravský", "Olomoucký", "Zlínský", "Moravskoslezský"),
-                    NUTS2 = c("CZ01", "CZ02", "CZ03", "CZ03", 
-                              "CZ04", "CZ04", "CZ05", "CZ05", "CZ05",
-                              "CZ06", "CZ06", "CZ07", "CZ07", "CZ08"),
-                    by = "NUTS3")
-    ) 
+                    NUTS2 = c("Praha", "Střední Čechy", "Jihozápad", "Jihozápad", 
+                              "Severozápad", "Severozápad", "Severovýchod", "Severovýchod", "Severovýchod",
+                              "Jihovýchod", "Jihovýchod", "Střední Morava", "Střední Morava", "Moravskoslezsko")), 
+             by = c("kraj" = "NUTS3")) 
+
 f
 
 
@@ -62,7 +62,7 @@ NUTS_3 <-
   
   inner_join(
     f %>%
-      group_by(NUTS_2) %>%
+      group_by(NUTS2) %>%
       count(kraj) %>%
       select(-n), 
     by = c("kraj" = "kraj"))  %>%
@@ -71,20 +71,20 @@ NUTS_3 <-
 
 
 
-NUTS_2 <- NUTS_3 %>%
-  count(NUTS_2, wt = pocet_zaku) %>%
+NUTS2 <- NUTS_3 %>%
+  count(NUTS2, wt = pocet_zaku) %>%
   rename(pocet_zaku = n) %>%
   
   inner_join(NUTS_3 %>%
-            count(NUTS_2, wt = pocet_asistentu) %>%
+            count(NUTS2, wt = pocet_asistentu) %>%
               rename(pocet_asistentu = n),
-            by = c("NUTS_2" = "NUTS_2")
+            by = c("NUTS2" = "NUTS2")
   ) %>%
   
   mutate(zna = pocet_zaku/ pocet_asistentu) %>%
+  mutate(NUTS2 = factor(NUTS2) %>% fct_relevel(c("Praha", "Střední Čechy", "Jihozápad",  "Severozápad", "Severovýchod", "Jihovýchod", "Střední Morava", "Moravskoslezsko"))) %>%
   
-  mutate(NUTS_2 = factor(NUTS_2) %>% fct_relevel(c("Praha", "Střední Čechy", "Jihozápad",  "Severozápad", "Severovýchod", "Jihovýchod", "Střední Morava", "Moravskoslezsko"))) %>%
-  arrange(NUTS_2) %>%
+  arrange(NUTS2) %>%
   filter(pocet_zaku != 0) 
 
 
@@ -110,10 +110,10 @@ six[2,1] = "Nemají: "
 
 
 
-write.xlsx(f, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/data.xlsx")
-write.xlsx(NUTS_2, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/NUTS-2.xlsx")
-write.xlsx(NUTS_3, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/NUTS-3.xlsx")
-write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/six.xlsx")
+write.xlsx(f, "data.xlsx")
+write.xlsx(NUTS2, "NUTS-2.xlsx")
+write.xlsx(NUTS_3, "NUTS-3.xlsx")
+write.xlsx(six, "six.xlsx")
 
   print("IV. Počet škol v krajích")
   print(NUTS_3 %>% select(kraj, pocet_skol))
@@ -124,7 +124,7 @@ write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/six.xlsx")
   
   
   print("IV.b Počet žáků za NUTS2: ")
-  print(NUTS_2 %>% select(NUTS_2, pocet_zaku))
+  print(NUTS2 %>% select(NUTS2, pocet_zaku))
   
   
   print("V. Počet žáků na assistenta/ku pedagoga/žky")
@@ -133,7 +133,7 @@ write.xlsx(six, "C:/Users/kryst/OneDrive/Documents/GitHub/R/test-1/six.xlsx")
   
   
   print("b. za NUTS2")
-  print(NUTS_2 %>% select(NUTS_2, zna))
+  print(NUTS2 %>% select(NUTS2, zna))
   
   
   
